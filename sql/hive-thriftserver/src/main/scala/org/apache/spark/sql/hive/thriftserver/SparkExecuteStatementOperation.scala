@@ -28,7 +28,7 @@ import scala.util.control.NonFatal
 
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.hadoop.hive.metastore.api.FieldSchema
-import org.apache.hadoop.hive.shims.Utils
+import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hive.service.cli._
 import org.apache.hive.service.cli.operation.ExecuteStatementOperation
 import org.apache.hive.service.cli.session.HiveSession
@@ -201,7 +201,9 @@ private[hive] class SparkExecuteStatementOperation(
     if (!runInBackground) {
       execute()
     } else {
-      val sparkServiceUGI = Utils.getUGI()
+      val proxyUser = System.getenv("HADOOP_USER_NAME")
+      val realUser = System.getenv("HADOOP_REAL_USER_NAME")
+      val sparkServiceUGI = UserGroupInformation.createProxyUser(proxyUser, UserGroupInformation.createRemoteUser(realUser))
 
       // Runnable impl to call runInternal asynchronously,
       // from a different thread
