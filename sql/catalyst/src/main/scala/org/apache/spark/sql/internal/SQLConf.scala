@@ -907,7 +907,7 @@ object SQLConf {
       s"using the data source set by ${DEFAULT_DATA_SOURCE_NAME.key}.")
     .version("2.0.0")
     .booleanConf
-    .createWithDefault(false)
+    .createWithDefault(true)
 
   val GATHER_FASTSTAT = buildConf("spark.sql.hive.gatherFastStats")
       .internal()
