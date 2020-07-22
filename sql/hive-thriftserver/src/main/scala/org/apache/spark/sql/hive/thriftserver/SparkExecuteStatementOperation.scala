@@ -201,9 +201,7 @@ private[hive] class SparkExecuteStatementOperation(
     if (!runInBackground) {
       execute()
     } else {
-      val proxyUser = System.getenv("HADOOP_USER_NAME")
-      val realUser = System.getenv("HADOOP_REAL_USER_NAME")
-      val sparkServiceUGI = UserGroupInformation.createProxyUser(proxyUser, UserGroupInformation.createRemoteUser(realUser))
+      val sparkServiceUGI = UserGroupInformation.getLoginUser
 
       // Runnable impl to call runInternal asynchronously,
       // from a different thread
