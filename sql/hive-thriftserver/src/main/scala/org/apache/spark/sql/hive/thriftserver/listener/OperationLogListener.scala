@@ -84,6 +84,9 @@ private[thriftserver] class OperationLogListener extends SparkListener with Logg
   override def onTaskEnd(taskEnd: SparkListenerTaskEnd): Unit = {
     val info = taskEnd.taskInfo
     val operationInfo = stageMap.get(taskEnd.stageId)
+
+    // 当Cancel任务时，是异步runInBackground，会导致onStageCompleted先执行
+    if (operationInfo == null) return
     operationInfo.current += 1
 
     val sb = new StringBuilder()
@@ -150,7 +153,7 @@ private[thriftserver] case class OperationInfo(
 private[thriftserver] object OperationLogListener {
   private val executor: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(
     new ThreadFactoryBuilder()
-      .setDaemon(true)
       .setNameFormat("OperationLogListener-%d")
+      .setDaemon(true)
       .build())
 }
