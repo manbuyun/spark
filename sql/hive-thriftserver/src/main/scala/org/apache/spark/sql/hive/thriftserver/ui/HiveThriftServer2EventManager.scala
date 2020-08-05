@@ -16,6 +16,8 @@
  */
 package org.apache.spark.sql.hive.thriftserver.ui
 
+import org.apache.hadoop.hive.ql.session.OperationLog
+
 import org.apache.spark.SparkContext
 import org.apache.spark.scheduler.SparkListenerEvent
 
@@ -44,9 +46,10 @@ private[thriftserver] class HiveThriftServer2EventManager(sc: SparkContext) {
       sessionId: String,
       statement: String,
       groupId: String,
-      userName: String = "UNKNOWN"): Unit = {
+      userName: String = "UNKNOWN",
+      operationLog: OperationLog = null): Unit = {
     postLiveListenerBus(SparkListenerThriftServerOperationStart(id, sessionId, statement, groupId,
-      System.currentTimeMillis(), userName))
+      System.currentTimeMillis(), userName, operationLog))
   }
 
   def onStatementParsed(id: String, executionPlan: String): Unit = {
@@ -87,7 +90,8 @@ private[thriftserver] case class SparkListenerThriftServerOperationStart(
     statement: String,
     groupId: String,
     startTime: Long,
-    userName: String = "UNKNOWN") extends SparkListenerEvent
+    userName: String = "UNKNOWN",
+    operationLog: OperationLog = null) extends SparkListenerEvent
 
 private[thriftserver] case class SparkListenerThriftServerOperationParsed(
     id: String,

@@ -195,7 +195,8 @@ private[hive] class SparkExecuteStatementOperation(
       parentSession.getSessionHandle.getSessionId.toString,
       statement,
       statementId,
-      parentSession.getUsername)
+      parentSession.getUsername,
+      operationLog)
     setHasResultSet(true) // avoid no resultset for async run
 
     if (!runInBackground) {
@@ -276,7 +277,7 @@ private[hive] class SparkExecuteStatementOperation(
         parentSession.getSessionState.getConf.setClassLoader(executionHiveClassLoader)
       }
 
-      sqlContext.sparkContext.setJobGroup(statementId, statement)
+      sqlContext.sparkContext.setJobGroup(statementId, statement, false, statementId)
       result = sqlContext.sql(statement)
       logDebug(result.queryExecution.toString())
       HiveThriftServer2.eventManager.onStatementParsed(statementId,
