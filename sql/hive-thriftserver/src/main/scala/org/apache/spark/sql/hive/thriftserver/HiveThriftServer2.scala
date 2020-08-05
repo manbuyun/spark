@@ -33,7 +33,7 @@ import org.apache.spark.internal.config.UI.UI_ENABLED
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.hive.HiveUtils
 import org.apache.spark.sql.hive.thriftserver.ReflectionUtils._
-import org.apache.spark.sql.hive.thriftserver.log.OperationLogListener
+import org.apache.spark.sql.hive.thriftserver.listener.OperationLogListener
 import org.apache.spark.sql.hive.thriftserver.ui._
 import org.apache.spark.status.ElementTrackingStore
 import org.apache.spark.util.{ShutdownHookManager, Utils}
