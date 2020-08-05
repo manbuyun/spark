@@ -46,8 +46,8 @@ private[thriftserver] class OperationLogListener extends SparkListener with Logg
     jobStart.stageIds.foreach(stageId => stageMap.put(stageId, OperationInfo(operationLog)))
 
     val sb = new StringBuilder()
-    sb.append(s"SparkContext: Starting job = ${jobStart.jobId}. ")
-    sb.append(s"Total stages = ${jobStart.stageIds.length}\n")
+    sb.append(s"SparkContext: Starting job = ${jobStart.jobId}, ")
+    sb.append(s"total stages = ${jobStart.stageIds.length}\n")
 
     operationLog.writeOperationLog(EXECUTION, sb.toString())
   }
@@ -55,7 +55,7 @@ private[thriftserver] class OperationLogListener extends SparkListener with Logg
   override def onJobEnd(jobEnd: SparkListenerJobEnd): Unit = {
     val operationInfo = jobMap.remove(jobEnd.jobId)
     val duration = TimeUnit.MILLISECONDS.toSeconds(jobEnd.time - operationInfo.startTime)
-    val logString = s"SparkContext: Ended job = ${jobEnd.jobId}. Time taken $duration seconds\n"
+    val logString = s"SparkContext: Ended job = ${jobEnd.jobId}, time taken $duration seconds\n"
 
     operationInfo.operationLog.writeOperationLog(EXECUTION, logString)
   }
@@ -131,7 +131,7 @@ private[thriftserver] class OperationLogListener extends SparkListener with Logg
 
     val sb = new StringBuilder()
     sb.append(s"SparkExecuteStatementOperation: Finished query with ${e.id}\n")
-    sb.append(s"SparkExecuteStatementOperation: Time taken $duration seconds\n")
+    sb.append(s"SparkExecuteStatementOperation: Total time taken $duration seconds\n")
 
     operationLog.writeOperationLog(EXECUTION, sb.toString())
   }
