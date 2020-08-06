@@ -43,7 +43,6 @@ private[thriftserver] class OperationLogListener extends SparkListener with Logg
     val operationLog = statementMap.get(statementId).operationLog
 
     jobMap.put(jobStart.jobId, OperationInfo(operationLog, jobStart.time))
-    jobStart.stageIds.foreach(stageId => stageMap.put(stageId, OperationInfo(operationLog)))
 
     val sb = new StringBuilder()
     sb.append(s"SparkContext: Starting job = ${jobStart.jobId}, ")
@@ -61,14 +60,16 @@ private[thriftserver] class OperationLogListener extends SparkListener with Logg
   }
 
   override def onStageSubmitted(stageSubmitted: SparkListenerStageSubmitted): Unit = {
+    val statementId = stageSubmitted.properties.getProperty(SparkContext.SPARK_JOB_STATEMENT_ID)
+    val operationLog = statementMap.get(statementId).operationLog
+
     val info = stageSubmitted.stageInfo
-    val operationInfo = stageMap.get(info.stageId)
-    operationInfo.total = info.numTasks
+    stageMap.put(info.stageId, OperationInfo(operationLog, 0, info.numTasks))
 
     val stageIdStr = s"${info.stageId}.${info.attemptNumber()}"
     val logString = s"DAGScheduler: Submitting ${info.numTasks} tasks from stage-$stageIdStr\n"
 
-    operationInfo.operationLog.writeOperationLog(EXECUTION, logString)
+    operationLog.writeOperationLog(EXECUTION, logString)
   }
 
   override def onStageCompleted(stageCompleted: SparkListenerStageCompleted): Unit = {
@@ -147,7 +148,7 @@ private[thriftserver] class OperationLogListener extends SparkListener with Logg
 private[thriftserver] case class OperationInfo(
     operationLog: OperationLog,
     startTime: Long = 0,
-    var total: Int = 0,
+    total: Int = 0,
     var current: Int = 0)
 
 private[thriftserver] object OperationLogListener {
