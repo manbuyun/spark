@@ -74,12 +74,13 @@ private[thriftserver] class OperationLogListener extends SparkListener with Logg
 
   override def onStageCompleted(stageCompleted: SparkListenerStageCompleted): Unit = {
     val info = stageCompleted.stageInfo
-    val operationLog = stageMap.remove(info.stageId).operationLog
+    val operationInfo = stageMap.remove(info.stageId)
 
+    val completed = operationInfo.current
     val stageIdStr = s"${info.stageId}.${info.attemptNumber()}"
-    val logString = s"DAGScheduler: Completed ${info.numTasks} tasks from stage-$stageIdStr\n"
+    val logString = s"DAGScheduler: Completed $completed tasks from stage-$stageIdStr\n"
 
-    operationLog.writeOperationLog(EXECUTION, logString)
+    operationInfo.operationLog.writeOperationLog(EXECUTION, logString)
   }
 
   override def onTaskEnd(taskEnd: SparkListenerTaskEnd): Unit = {
