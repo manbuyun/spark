@@ -220,6 +220,8 @@ private[hive] class SparkExecuteStatementOperation(
                 case e: HiveSQLException =>
                   setOperationException(e)
                   log.error("Error running hive query: ", e)
+              } finally {
+                unregisterOperationLog()
               }
             }
           }
