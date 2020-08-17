@@ -97,7 +97,7 @@ public class OperationManager extends AbstractService {
   public ExecuteStatementOperation newExecuteStatementOperation(HiveSession parentSession,
       String statement, Map<String, String> confOverlay, boolean runAsync, long queryTimeout)
           throws HiveSQLException {
-    return newExecuteStatementOperation(parentSession, statement, confOverlay, runAsync);
+    return newExecuteStatementOperation(parentSession, statement, confOverlay, runAsync, queryTimeout);
   }
 
   public GetTypeInfoOperation newGetTypeInfoOperation(HiveSession parentSession) {
@@ -216,7 +216,7 @@ public class OperationManager extends AbstractService {
     }
     else {
       LOG.debug(opHandle + ": Attempting to cancel from state - " + opState);
-      operation.cancel();
+      operation.cancel(OperationState.CANCELED);
     }
   }
 

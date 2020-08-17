@@ -294,8 +294,8 @@ public class SQLOperation extends ExecuteStatementOperation {
   }
 
   @Override
-  public void cancel() throws HiveSQLException {
-    cleanup(OperationState.CANCELED);
+  public void cancel(OperationState stateAfterCancel) throws HiveSQLException {
+    cleanup(stateAfterCancel);
   }
 
   @Override

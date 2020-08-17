@@ -37,7 +37,7 @@ private[hive] trait SparkOperation extends Operation with Logging {
 
   protected var statementId = getHandle().getHandleIdentifier().getPublicId().toString()
 
-  protected def cleanup(): Unit = Unit // noop by default
+  protected def cleanup(state: OperationState): Unit = Unit // noop by default
 
   abstract override def run(): Unit = {
     withLocalProperties {
@@ -46,11 +46,14 @@ private[hive] trait SparkOperation extends Operation with Logging {
   }
 
   abstract override def close(): Unit = {
-    super.close()
-    cleanup()
+    cleanup(OperationState.CLOSED)
+    cleanupOperationLog()
     logInfo(s"Close statement with $statementId")
     HiveThriftServer2.eventManager.onOperationClosed(statementId)
   }
+
+  // workaround
+  override protected def cleanupOperationLog(): Unit = super.cleanupOperationLog()
 
   // Set thread local properties for the execution of the operation.
   // This method should be applied during the execution of the operation, by all the child threads.

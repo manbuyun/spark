@@ -293,8 +293,8 @@ public abstract class Operation {
   }
 
   // TODO: make this abstract and implement in subclasses.
-  public void cancel() throws HiveSQLException {
-    setState(OperationState.CANCELED);
+  public void cancel(OperationState stateAfterCancel) throws HiveSQLException {
+    setState(stateAfterCancel);
     throw new UnsupportedOperationException("SQLOperation.cancel()");
   }
 

@@ -20,13 +20,16 @@ package org.apache.spark.sql.hive.thriftserver
 import java.security.PrivilegedExceptionAction
 import java.sql.{Date, Timestamp}
 import java.util.{Arrays, Map => JMap, UUID}
-import java.util.concurrent.RejectedExecutionException
+import java.util.concurrent.{RejectedExecutionException, TimeUnit}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.NonFatal
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder
+import io.netty.util.{HashedWheelTimer, Timeout, TimerTask}
 import org.apache.commons.lang3.exception.ExceptionUtils
+import org.apache.hadoop.hive.conf.HiveConf
 import org.apache.hadoop.hive.metastore.api.FieldSchema
 import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hive.service.cli._
@@ -48,7 +51,8 @@ private[hive] class SparkExecuteStatementOperation(
     parentSession: HiveSession,
     statement: String,
     confOverlay: JMap[String, String],
-    runInBackground: Boolean = true)
+    runInBackground: Boolean = true,
+    var queryTimeout: Long = 0L)
   extends ExecuteStatementOperation(parentSession, statement, confOverlay, runInBackground)
   with SparkOperation
   with Logging {
@@ -63,6 +67,11 @@ private[hive] class SparkExecuteStatementOperation(
   private var previousFetchStartOffset: Long = 0
   private var iter: Iterator[SparkRow] = _
   private var dataTypes: Array[DataType] = _
+
+  private var maybeTimeout: Option[Timeout] = _
+  private val timeout: Long = HiveConf.getTimeVar(parentSession.getHiveConf,
+    HiveConf.ConfVars.HIVE_QUERY_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+  if (timeout > 0 && (queryTimeout <= 0 || timeout < queryTimeout)) queryTimeout = timeout
 
   private lazy val resultSchema: TableSchema = {
     if (result == null || result.schema.isEmpty) {
@@ -187,7 +196,26 @@ private[hive] class SparkExecuteStatementOperation(
 
   def getResultSetSchema: TableSchema = resultSchema
 
+  private def prepare(): Unit = {
+    if (queryTimeout > 0L) {
+      maybeTimeout = Option(SparkExecuteStatementOperation.wheelTimer.newTimeout(new TimerTask {
+        override def run(timeout: Timeout): Unit = {
+          if (!getStatus.getState.isTerminal) {
+            try {
+              logInfo(s"Query timed out after $queryTimeout seconds")
+              cancel(OperationState.TIMEDOUT)
+            } catch {
+              case e: HiveSQLException =>
+                logError(s"Error cancelling the query after timeout $queryTimeout seconds", e)
+            }
+          }
+        }
+      }, queryTimeout, TimeUnit.SECONDS))
+    }
+  }
+
   override def runInternal(): Unit = {
+    prepare()
     setState(OperationState.PENDING)
     logInfo(s"Submitting query '$statement' with $statementId")
     HiveThriftServer2.eventManager.onStatementStart(
@@ -335,18 +363,19 @@ private[hive] class SparkExecuteStatementOperation(
     }
   }
 
-  override def cancel(): Unit = {
+  override def cancel(stateAfterCancel: OperationState): Unit = {
     synchronized {
       if (!getStatus.getState.isTerminal) {
         logInfo(s"Cancel query with $statementId")
-        setState(OperationState.CANCELED)
-        cleanup()
+        cleanup(stateAfterCancel)
         HiveThriftServer2.eventManager.onStatementCanceled(statementId)
       }
     }
   }
 
-  override protected def cleanup(): Unit = {
+  override protected def cleanup(state: OperationState): Unit = {
+    setState(state)
+
     if (runInBackground) {
       val backgroundHandle = getBackgroundHandle()
       if (backgroundHandle != null) {
@@ -357,10 +386,26 @@ private[hive] class SparkExecuteStatementOperation(
     if (statementId != null) {
       sqlContext.sparkContext.cancelJobGroup(statementId)
     }
+
+    if (state != OperationState.TIMEDOUT && state.isTerminal) {
+      maybeTimeout match {
+        case Some(timeout) => timeout.cancel()
+      }
+    }
   }
 }
 
 object SparkExecuteStatementOperation {
+  private lazy val wheelTimer: HashedWheelTimer = {
+    val timer = new HashedWheelTimer(
+      new ThreadFactoryBuilder()
+        .setNameFormat("HashedWheelTimer-%d")
+        .setDaemon(true)
+        .build(), 1, TimeUnit.SECONDS)
+    timer.start
+    timer
+  }
+
   def getTableSchema(structType: StructType): TableSchema = {
     val schema = structType.map { field =>
       val attrTypeString = field.dataType match {
