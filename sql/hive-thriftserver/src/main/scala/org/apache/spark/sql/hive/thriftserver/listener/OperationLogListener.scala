@@ -16,9 +16,8 @@
  */
 package org.apache.spark.sql.hive.thriftserver.listener
 
-import java.util.concurrent.{ConcurrentHashMap, Executors, ScheduledExecutorService, TimeUnit}
+import java.util.concurrent.{ConcurrentHashMap, TimeUnit}
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder
 import org.apache.hadoop.hive.ql.session.OperationLog
 import org.apache.hadoop.hive.ql.session.OperationLog.LoggingLevel.EXECUTION
 
