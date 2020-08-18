@@ -102,22 +102,11 @@ private[thriftserver] class OperationLogListener extends SparkListener with Logg
 
   override def onOtherEvent(event: SparkListenerEvent): Unit = {
     event match {
-      case e: SparkListenerThriftServerSessionCreated => onSessionCreated(e)
       case e: SparkListenerThriftServerOperationStart => onOperationStart(e)
       case e: SparkListenerThriftServerOperationFinish => onOperationFinish(e)
       case e: SparkListenerThriftServerOperationClosed => onOperationClosed(e)
       case _ => // Ignore
     }
-  }
-
-  private def onSessionCreated(e: SparkListenerThriftServerSessionCreated): Unit = {
-    OperationLogListener.executor.scheduleAtFixedRate(() => {
-      val sb = new StringBuilder()
-      sb.append(s"Total queries = ${statementMap.size()}, ")
-      sb.append(s"jobs = ${jobMap.size()}, ")
-      sb.append(s"stages = ${stageMap.size()}")
-      logInfo(sb.toString())
-    }, 1, 3, TimeUnit.MINUTES)
   }
 
   private def onOperationStart(e: SparkListenerThriftServerOperationStart): Unit = {
@@ -151,11 +140,3 @@ private[thriftserver] case class OperationInfo(
     startTime: Long = 0,
     total: Int = 0,
     var current: Int = 0)
-
-private[thriftserver] object OperationLogListener {
-  private val executor: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(
-    new ThreadFactoryBuilder()
-      .setNameFormat("OperationLogListener-%d")
-      .setDaemon(true)
-      .build())
-}
