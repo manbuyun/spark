@@ -16,8 +16,10 @@
  */
 package org.apache.spark.sql.hive.thriftserver.listener
 
+import java.math.RoundingMode
 import java.util.concurrent.{ConcurrentHashMap, TimeUnit}
 
+import com.google.common.math.IntMath
 import org.apache.hadoop.hive.ql.session.OperationLog
 import org.apache.hadoop.hive.ql.session.OperationLog.LoggingLevel.EXECUTION
 
@@ -90,13 +92,15 @@ private[thriftserver] class OperationLogListener extends SparkListener with Logg
     if (operationInfo == null) return
     operationInfo.current += 1
 
-    val sb = new StringBuilder()
-    sb.append(s"TaskSetManager: Finished task ${info.id} ")
-    sb.append(s"in stage-${taskEnd.stageId}.${taskEnd.stageAttemptId} ")
-    sb.append(s"in ${info.duration} ms on ${info.host} (executor ${info.executorId}) ")
-    sb.append(s"(${operationInfo.current}/${operationInfo.total})\n")
+    if (isLogEnable(operationInfo.current, operationInfo.total)) {
+      val sb = new StringBuilder()
+      sb.append(s"TaskSetManager: Finished task ${info.id} ")
+      sb.append(s"in stage-${taskEnd.stageId}.${taskEnd.stageAttemptId} ")
+      sb.append(s"in ${info.duration} ms on ${info.host} (executor ${info.executorId}) ")
+      sb.append(s"(${operationInfo.current}/${operationInfo.total})\n")
 
-    operationInfo.operationLog.writeOperationLog(EXECUTION, sb.toString())
+      operationInfo.operationLog.writeOperationLog(EXECUTION, sb.toString())
+    }
   }
 
   override def onOtherEvent(event: SparkListenerEvent): Unit = {
@@ -131,6 +135,11 @@ private[thriftserver] class OperationLogListener extends SparkListener with Logg
 
   private def onOperationClosed(e: SparkListenerThriftServerOperationClosed): Unit = {
     statementMap.remove(e.id)
+  }
+
+  private def isLogEnable(current: Int, total: Int): Boolean = {
+    val divide = IntMath.divide(total, 20, RoundingMode.UP)
+    if (current % divide == 0 || current == 1 || current == total) true else false
   }
 }
 
