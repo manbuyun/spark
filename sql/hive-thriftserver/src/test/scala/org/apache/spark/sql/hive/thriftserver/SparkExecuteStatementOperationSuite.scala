@@ -59,7 +59,7 @@ class SparkExecuteStatementOperationSuite extends SparkFunSuite with SharedSpark
   }
 
   Seq(
-    (OperationState.CANCELED, (_: SparkExecuteStatementOperation).cancel()),
+    (OperationState.CANCELED, (_: SparkExecuteStatementOperation).cancel(OperationState.CANCELED)),
     (OperationState.CLOSED, (_: SparkExecuteStatementOperation).close())
   ).foreach { case (finalState, transition) =>
     test("SPARK-32057 SparkExecuteStatementOperation should not transiently become ERROR " +
@@ -110,8 +110,8 @@ class SparkExecuteStatementOperationSuite extends SparkFunSuite with SharedSpark
     extends SparkExecuteStatementOperation(sqlContext, hiveSession, statement,
       new util.HashMap, false) {
 
-    override def cleanup(): Unit = {
-      super.cleanup()
+    override def cleanup(state: OperationState): Unit = {
+      super.cleanup(state)
       signal.release()
       // At this point, operation should already be in finalState (set by either close() or
       // cancel()). We want to check if it stays in finalState after the exception thrown by
