@@ -22,6 +22,7 @@ import java.lang.Thread.UncaughtExceptionHandler
 import java.lang.management.ManagementFactory
 import java.net.{URI, URL}
 import java.nio.ByteBuffer
+import java.security.PrivilegedExceptionAction
 import java.util.Properties
 import java.util.concurrent._
 import java.util.concurrent.atomic.AtomicBoolean
@@ -34,6 +35,7 @@ import scala.concurrent.duration._
 import scala.util.control.NonFatal
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder
+import org.apache.hadoop.security.UserGroupInformation
 
 import org.apache.spark._
 import org.apache.spark.deploy.SparkHadoopUtil
@@ -381,6 +383,18 @@ private[spark] class Executor(
     }
 
     override def run(): Unit = {
+      val proxyUser = taskDescription.properties.getProperty(SparkContext.SPARK_JOB_STATEMENT_USER)
+      proxyUser match {
+        case user: String =>
+          val ugi = UserGroupInformation.createProxyUser(user, UserGroupInformation.getLoginUser)
+          ugi.doAs(new PrivilegedExceptionAction[Unit]() {
+            override def run(): Unit = runWithUgi()
+          })
+        case _ => runWithUgi()
+      }
+    }
+
+    def runWithUgi(): Unit = {
       threadId = Thread.currentThread.getId
       Thread.currentThread.setName(threadName)
       val threadMXBean = ManagementFactory.getThreadMXBean

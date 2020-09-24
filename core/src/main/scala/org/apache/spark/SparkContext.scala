@@ -730,10 +730,9 @@ class SparkContext(config: SparkConf) extends Logging {
    * may respond to Thread.interrupt() by marking nodes as dead.
    */
   def setJobGroup(groupId: String,
-      description: String, interruptOnCancel: Boolean = false, statementId: String = null): Unit = {
+      description: String, interruptOnCancel: Boolean = false): Unit = {
     setLocalProperty(SparkContext.SPARK_JOB_DESCRIPTION, description)
     setLocalProperty(SparkContext.SPARK_JOB_GROUP_ID, groupId)
-    setLocalProperty(SparkContext.SPARK_JOB_STATEMENT_ID, statementId)
     // Note: Specifying interruptOnCancel in setJobGroup (rather than cancelJobGroup) avoids
     // changing several public APIs and allows Spark cancellations outside of the cancelJobGroup
     // APIs to also take advantage of this property (e.g., internal job failures or canceling from
@@ -745,7 +744,6 @@ class SparkContext(config: SparkConf) extends Logging {
   def clearJobGroup(): Unit = {
     setLocalProperty(SparkContext.SPARK_JOB_DESCRIPTION, null)
     setLocalProperty(SparkContext.SPARK_JOB_GROUP_ID, null)
-    setLocalProperty(SparkContext.SPARK_JOB_STATEMENT_ID, null)
     setLocalProperty(SparkContext.SPARK_JOB_INTERRUPT_ON_CANCEL, null)
   }
 
@@ -2648,6 +2646,7 @@ object SparkContext extends Logging {
   private[spark] val SPARK_JOB_DESCRIPTION = "spark.job.description"
   private[spark] val SPARK_JOB_GROUP_ID = "spark.jobGroup.id"
   private[spark] val SPARK_JOB_STATEMENT_ID = "spark.statement.id"
+  private[spark] val SPARK_JOB_STATEMENT_USER = "spark.statement.user"
   private[spark] val SPARK_JOB_INTERRUPT_ON_CANCEL = "spark.job.interruptOnCancel"
   private[spark] val SPARK_SCHEDULER_POOL = "spark.scheduler.pool"
   private[spark] val RDD_SCOPE_KEY = "spark.rdd.scope"

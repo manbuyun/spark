@@ -24,7 +24,7 @@ import scala.concurrent.{ExecutionContext, Promise}
 import scala.concurrent.duration.NANOSECONDS
 import scala.util.control.NonFatal
 
-import org.apache.spark.{broadcast, SparkContext, SparkException}
+import org.apache.spark.{broadcast, SparkException}
 import org.apache.spark.launcher.SparkLauncher
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.catalyst.InternalRow
@@ -114,7 +114,7 @@ case class BroadcastExchangeExec(
           try {
             // Setup a job group here so later it may get cancelled by groupId if necessary.
             sparkContext.setJobGroup(runId.toString, s"broadcast exchange (runId $runId)",
-              true, sparkContext.getLocalProperty(SparkContext.SPARK_JOB_STATEMENT_ID))
+              interruptOnCancel = true)
             val beforeCollect = System.nanoTime()
             // Use executeCollect/executeCollectIterator to avoid conversion to Scala types
             val (numRows, input) = child.executeCollectIterator()
