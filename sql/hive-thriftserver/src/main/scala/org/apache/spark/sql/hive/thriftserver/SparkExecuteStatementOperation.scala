@@ -307,8 +307,11 @@ private[hive] class SparkExecuteStatementOperation(
 
       sqlContext.sparkContext.setJobGroup(statementId, statement)
       sqlContext.sparkContext.setLocalProperty(SparkContext.SPARK_JOB_STATEMENT_ID, statementId)
-      sqlContext.sparkContext.setLocalProperty(SparkContext.SPARK_JOB_STATEMENT_USER,
-        parentSession.getUserName)
+      if (parentSession.isImpersonation) {
+        sqlContext.sparkContext.setLocalProperty(SparkContext.SPARK_JOB_STATEMENT_USER,
+          parentSession.getUserName)
+      }
+
       result = sqlContext.sql(statement)
       logDebug(result.queryExecution.toString())
       HiveThriftServer2.eventManager.onStatementParsed(statementId,

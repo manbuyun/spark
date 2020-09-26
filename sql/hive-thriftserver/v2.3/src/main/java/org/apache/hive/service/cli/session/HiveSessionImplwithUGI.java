@@ -82,6 +82,11 @@ public class HiveSessionImplwithUGI extends HiveSessionImpl {
     return this.sessionUgi;
   }
 
+  @Override
+  public boolean isImpersonation() {
+    return true;
+  }
+
   public String getDelegationToken() {
     return this.delegationTokenStr;
   }
