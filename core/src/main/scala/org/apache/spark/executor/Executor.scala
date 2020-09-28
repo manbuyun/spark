@@ -386,7 +386,7 @@ private[spark] class Executor(
       val proxyUser = taskDescription.properties.getProperty(SparkContext.SPARK_JOB_STATEMENT_USER)
       proxyUser match {
         case user: String =>
-          val ugi = UserGroupInformation.createProxyUser(user, UserGroupInformation.getLoginUser)
+          val ugi = UserGroupInformation.createProxyUser(user, UserGroupInformation.getCurrentUser)
           ugi.doAs(new PrivilegedExceptionAction[Unit]() {
             override def run(): Unit = runWithUgi()
           })

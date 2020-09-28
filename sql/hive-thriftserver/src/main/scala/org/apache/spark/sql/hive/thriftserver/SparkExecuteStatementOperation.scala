@@ -30,7 +30,7 @@ import io.netty.util.{HashedWheelTimer, Timeout, TimerTask}
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.hadoop.hive.conf.HiveConf
 import org.apache.hadoop.hive.metastore.api.FieldSchema
-import org.apache.hadoop.hive.shims.Utils
+import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hive.service.cli._
 import org.apache.hive.service.cli.operation.ExecuteStatementOperation
 import org.apache.hive.service.cli.session.HiveSession
@@ -228,7 +228,7 @@ private[hive] class SparkExecuteStatementOperation(
     if (!runInBackground) {
       execute()
     } else {
-      val sparkServiceUGI = Utils.getUGI()
+      val sparkServiceUGI = UserGroupInformation.createRemoteUser(parentSession.getUserName)
 
       // Runnable impl to call runInternal asynchronously,
       // from a different thread
