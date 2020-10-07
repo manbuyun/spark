@@ -37,7 +37,6 @@ private[spark] object UGICache {
     .build[String, UserGroupInformation]()
 
   def getUGI(user: String): UserGroupInformation = {
-    cache.get(user, () =>
-      UserGroupInformation.createProxyUser(user, UserGroupInformation.getCurrentUser))
+    cache.get(user, () => UserGroupInformation.createRemoteUser(user))
   }
 }
