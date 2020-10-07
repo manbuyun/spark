@@ -42,7 +42,7 @@ import org.apache.spark.sql.execution.HiveResult
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.CalendarInterval
-import org.apache.spark.util.{Utils => SparkUtils}
+import org.apache.spark.util.{UGICache, Utils => SparkUtils}
 
 private[hive] class SparkExecuteStatementOperation(
     val sqlContext: SQLContext,
@@ -228,7 +228,7 @@ private[hive] class SparkExecuteStatementOperation(
     if (!runInBackground) {
       execute()
     } else {
-      val sparkServiceUGI = UserGroupInformation.createRemoteUser(parentSession.getUserName)
+      val sparkServiceUGI = UGICache.getUGI(parentSession.getUserName)
 
       // Runnable impl to call runInternal asynchronously,
       // from a different thread
