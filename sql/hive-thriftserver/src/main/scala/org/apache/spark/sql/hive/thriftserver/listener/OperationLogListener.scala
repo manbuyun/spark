@@ -91,14 +91,14 @@ private[thriftserver] class OperationLogListener extends SparkListener with Logg
 
     // 当Cancel任务时，是异步runInBackground，会导致onStageCompleted先执行
     if (operationInfo == null) return
-    operationInfo.current.incrementAndGet()
 
-    if (isLogEnable(operationInfo.current.get(), operationInfo.total)) {
+    val currentTask = operationInfo.current.incrementAndGet()
+    if (isLogEnable(currentTask, operationInfo.total)) {
       val sb = new StringBuilder()
       sb.append(s"TaskSetManager: Finished task ${info.id} ")
       sb.append(s"in stage-${taskEnd.stageId}.${taskEnd.stageAttemptId} ")
       sb.append(s"in ${info.duration} ms on ${info.host} (executor ${info.executorId}) ")
-      sb.append(s"(${operationInfo.current}/${operationInfo.total})\n")
+      sb.append(s"($currentTask/${operationInfo.total})\n")
 
       operationInfo.operationLog.writeOperationLog(EXECUTION, sb.toString())
     }
