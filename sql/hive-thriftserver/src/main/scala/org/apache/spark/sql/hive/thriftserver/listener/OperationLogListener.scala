@@ -18,6 +18,7 @@ package org.apache.spark.sql.hive.thriftserver.listener
 
 import java.math.RoundingMode
 import java.util.concurrent.{ConcurrentHashMap, TimeUnit}
+import java.util.concurrent.atomic.AtomicInteger
 
 import com.google.common.math.IntMath
 import org.apache.hadoop.hive.ql.session.OperationLog
@@ -90,9 +91,9 @@ private[thriftserver] class OperationLogListener extends SparkListener with Logg
 
     // 当Cancel任务时，是异步runInBackground，会导致onStageCompleted先执行
     if (operationInfo == null) return
-    operationInfo.current += 1
+    operationInfo.current.incrementAndGet()
 
-    if (isLogEnable(operationInfo.current, operationInfo.total)) {
+    if (isLogEnable(operationInfo.current.get(), operationInfo.total)) {
       val sb = new StringBuilder()
       sb.append(s"TaskSetManager: Finished task ${info.id} ")
       sb.append(s"in stage-${taskEnd.stageId}.${taskEnd.stageAttemptId} ")
@@ -147,4 +148,4 @@ private[thriftserver] case class OperationInfo(
     operationLog: OperationLog,
     startTime: Long = 0,
     total: Int = 0,
-    var current: Int = 0)
+    var current: AtomicInteger = new AtomicInteger(0))
