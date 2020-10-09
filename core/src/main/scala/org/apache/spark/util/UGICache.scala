@@ -32,7 +32,7 @@ import org.apache.hadoop.security.UserGroupInformation
 private[spark] object UGICache {
 
   private val cache = CacheBuilder.newBuilder
-    .expireAfterAccess(30 * 60 * 1000, TimeUnit.MILLISECONDS)
+    .expireAfterAccess(30, TimeUnit.MINUTES)
     .maximumSize(32)
     .build[String, UserGroupInformation]()
 
