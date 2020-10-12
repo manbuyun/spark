@@ -28,6 +28,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.internal.Logging
 import org.apache.spark.scheduler._
 import org.apache.spark.sql.hive.thriftserver.ui._
+import org.apache.spark.util.StringBuilderHelper
 
 /**
  * @author jinhai
@@ -46,7 +47,7 @@ private[thriftserver] class OperationLogListener extends SparkListener with Logg
 
     jobMap.put(jobStart.jobId, OperationInfo(operationLog, jobStart.time))
 
-    val sb = new StringBuilder()
+    val sb = StringBuilderHelper.get()
     sb.append(s"SparkContext: Starting job = ${jobStart.jobId}, ")
     sb.append(s"total stages = ${jobStart.stageIds.length}\n")
 
@@ -94,7 +95,7 @@ private[thriftserver] class OperationLogListener extends SparkListener with Logg
 
     val currentTask = operationInfo.current.incrementAndGet()
     if (isLogEnable(currentTask, operationInfo.total)) {
-      val sb = new StringBuilder()
+      val sb = StringBuilderHelper.get()
       sb.append(s"TaskSetManager: Finished task ${info.id} ")
       sb.append(s"in stage-${taskEnd.stageId}.${taskEnd.stageAttemptId} ")
       sb.append(s"in ${info.duration} ms on ${info.host} (executor ${info.executorId}) ")
@@ -116,7 +117,7 @@ private[thriftserver] class OperationLogListener extends SparkListener with Logg
   private def onOperationStart(e: SparkListenerThriftServerOperationStart): Unit = {
     statementMap.put(e.id, OperationInfo(e.operationLog, e.startTime))
 
-    val sb = new StringBuilder()
+    val sb = StringBuilderHelper.get()
     sb.append(s"SparkExecuteStatementOperation: Submitting query at ${e.startTime}\n")
     sb.append(s"SparkExecuteStatementOperation: Query ID = ${e.id}. User = ${e.userName}\n")
 
@@ -127,7 +128,7 @@ private[thriftserver] class OperationLogListener extends SparkListener with Logg
     val operationLog = statementMap.get(e.id).operationLog
     val duration = TimeUnit.MILLISECONDS.toSeconds(e.finishTime - statementMap.get(e.id).startTime)
 
-    val sb = new StringBuilder()
+    val sb = StringBuilderHelper.get()
     sb.append(s"SparkExecuteStatementOperation: Finished query with ${e.id}\n")
     sb.append(s"SparkExecuteStatementOperation: Total time taken $duration seconds\n")
 
