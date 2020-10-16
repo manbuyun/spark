@@ -795,7 +795,9 @@ private[client] class Shim_v0_13 extends Shim_v0_12 {
 
     val partitions =
       if (filter.isEmpty) {
-        getAllPartitionsMethod.invoke(hive, table).asInstanceOf[JSet[Partition]]
+//        getAllPartitionsMethod.invoke(hive, table).asInstanceOf[JSet[Partition]]
+        throw new RuntimeException(s"No partition key found for table $table. " +
+          s"Predicates: ${predicates.mkString(",")}")
       } else {
         logDebug(s"Hive metastore filter is '$filter'.")
         val tryDirectSqlConfVar = HiveConf.ConfVars.METASTORE_TRY_DIRECT_SQL
