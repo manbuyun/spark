@@ -795,7 +795,7 @@ private[client] class Shim_v0_13 extends Shim_v0_12 {
 
     val partitions =
       if (filter.isEmpty) {
-//        getAllPartitionsMethod.invoke(hive, table).asInstanceOf[JSet[Partition]]
+        // getAllPartitionsMethod.invoke(hive, table).asInstanceOf[JSet[Partition]]
         throw new UnsupportedOperationException(s"No partition key found for table $table. " +
           s"Expected: ${table.getPartitionKeys}")
       } else {
