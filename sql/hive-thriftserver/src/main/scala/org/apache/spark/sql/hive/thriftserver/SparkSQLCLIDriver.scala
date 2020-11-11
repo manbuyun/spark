@@ -197,6 +197,8 @@ private[hive] object SparkSQLCLIDriver extends Logging {
       SparkSQLEnv.sqlContext.setConf(k, v)
     }
 
+    cli.printMasterAndAppId
+
     if (sessionState.execString != null) {
       System.exit(cli.processLine(sessionState.execString))
     }
@@ -265,8 +267,6 @@ private[hive] object SparkSQLCLIDriver extends Logging {
     def promptWithCurrentDB: String = s"$prompt$currentDB"
     def continuedPromptWithDBSpaces: String = continuedPrompt + ReflectionUtils.invokeStatic(
       classOf[CliDriver], "spacesForString", classOf[String] -> currentDB)
-
-    cli.printMasterAndAppId
 
     var currentPrompt = promptWithCurrentDB
     var line = reader.readLine(currentPrompt + "> ")
