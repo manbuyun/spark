@@ -2047,7 +2047,7 @@ object SQLConf {
       .stringConf
       .transform(_.toUpperCase(Locale.ROOT))
       .checkValues(StoreAssignmentPolicy.values.map(_.toString))
-      .createWithDefault(StoreAssignmentPolicy.ANSI.toString)
+      .createWithDefault(StoreAssignmentPolicy.LEGACY.toString)
 
   val ANSI_ENABLED = buildConf("spark.sql.ansi.enabled")
     .doc("When true, Spark tries to conform to the ANSI SQL specification: 1. Spark will " +
