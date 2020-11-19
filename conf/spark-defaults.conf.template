@@ -25,3 +25,25 @@
 # spark.serializer                 org.apache.spark.serializer.KryoSerializer
 # spark.driver.memory              5g
 # spark.executor.extraJavaOptions  -XX:+PrintGCDetails -Dkey=value -Dnumbers="one two three"
+
+spark.ui.showConsoleProgress true
+spark.driver.maxResultSize 4g
+spark.network.timeout 300s
+spark.serializer org.apache.spark.serializer.KryoSerializer
+
+spark.sql.storeAssignmentPolicy legacy
+spark.sql.hive.convertCTAS true
+spark.sql.legacy.typeCoercion.datetimeToString.enabled true
+spark.sql.sources.partitionOverwriteMode dynamic
+spark.sql.broadcastTimeout 600
+spark.sql.adaptive.enabled true
+
+spark.kubernetes.allocation.batch.size 50
+
+spark.dynamicAllocation.enabled true
+spark.dynamicAllocation.shuffleTracking.enabled true
+spark.dynamicAllocation.minExecutors 30
+spark.dynamicAllocation.maxExecutors 300
+
+spark.hadoop.fs.permissions.umask-mode 002
+spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version 2

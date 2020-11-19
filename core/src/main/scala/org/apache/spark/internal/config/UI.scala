@@ -27,7 +27,7 @@ private[spark] object UI {
     .doc("When true, show the progress bar in the console.")
     .version("1.2.1")
     .booleanConf
-    .createWithDefault(true)
+    .createWithDefault(false)
 
   val UI_CONSOLE_PROGRESS_UPDATE_INTERVAL =
     ConfigBuilder("spark.ui.consoleProgress.update.interval")

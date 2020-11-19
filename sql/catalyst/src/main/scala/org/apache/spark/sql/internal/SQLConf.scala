@@ -915,7 +915,7 @@ object SQLConf {
       s"using the data source set by ${DEFAULT_DATA_SOURCE_NAME.key}.")
     .version("2.0.0")
     .booleanConf
-    .createWithDefault(true)
+    .createWithDefault(false)
 
   val GATHER_FASTSTAT = buildConf("spark.sql.hive.gatherFastStats")
       .internal()
@@ -2047,7 +2047,7 @@ object SQLConf {
       .stringConf
       .transform(_.toUpperCase(Locale.ROOT))
       .checkValues(StoreAssignmentPolicy.values.map(_.toString))
-      .createWithDefault(StoreAssignmentPolicy.LEGACY.toString)
+      .createWithDefault(StoreAssignmentPolicy.ANSI.toString)
 
   val ANSI_ENABLED = buildConf("spark.sql.ansi.enabled")
     .doc("When true, Spark tries to conform to the ANSI SQL specification: 1. Spark will " +
