@@ -37,6 +37,7 @@ spark.sql.legacy.typeCoercion.datetimeToString.enabled true
 spark.sql.sources.partitionOverwriteMode dynamic
 spark.sql.broadcastTimeout 600
 spark.sql.adaptive.enabled true
+spark.sql.maxPlanStringLength 2048
 
 spark.kubernetes.allocation.batch.size 50
 
