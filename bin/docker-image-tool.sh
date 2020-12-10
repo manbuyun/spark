@@ -92,7 +92,7 @@ function create_dev_build_context {(
   mkdir -p "$BASE_CTX/kubernetes"
   cp -r "resource-managers/kubernetes/docker/src/main/dockerfiles" \
     "$BASE_CTX/kubernetes/dockerfiles"
-
+  cp -r "conf" "$BASE_CTX/conf"
   cp -r "assembly/target/scala-$SPARK_SCALA_VERSION/jars" "$BASE_CTX/jars"
   cp -r "resource-managers/kubernetes/integration-tests/tests" \
     "$BASE_CTX/kubernetes/tests"

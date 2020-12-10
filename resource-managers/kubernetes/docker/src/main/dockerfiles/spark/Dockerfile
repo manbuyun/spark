@@ -37,7 +37,6 @@ RUN set -ex && \
     mkdir -p /opt/spark && \
     mkdir -p /opt/spark/examples && \
     mkdir -p /opt/spark/work-dir && \
-    mkdir -p /opt/hadoop/conf && \
     touch /opt/spark/RELEASE && \
     rm /bin/sh && \
     ln -sv /bin/bash /bin/sh && \
@@ -52,12 +51,10 @@ COPY kubernetes/dockerfiles/spark/entrypoint.sh /opt/
 COPY examples /opt/spark/examples
 COPY kubernetes/tests /opt/spark/tests
 COPY data /opt/spark/data
-COPY conf/core-site.xml /opt/hadoop/conf
-COPY conf/hdfs-site.xml /opt/hadoop/conf
-COPY conf/hive-site.xml /opt/hadoop/conf
+COPY conf /opt/spark/conf
 
 ENV SPARK_HOME /opt/spark
-ENV HADOOP_CONF_DIR /opt/hadoop/conf
+ENV HADOOP_CONF_DIR /opt/spark/conf
 
 WORKDIR /opt/spark/work-dir
 RUN chmod g+w /opt/spark/work-dir
