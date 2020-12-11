@@ -25,11 +25,18 @@
 # spark.serializer                 org.apache.spark.serializer.KryoSerializer
 # spark.driver.memory              5g
 # spark.executor.extraJavaOptions  -XX:+PrintGCDetails -Dkey=value -Dnumbers="one two three"
+# spark.kubernetes.driverEnv.HADOOP_USER_NAME xxx
+# spark.executorEnv.HADOOP_USER_NAME xxx
 
 spark.ui.showConsoleProgress true
-spark.driver.maxResultSize 4g
 spark.network.timeout 300s
 spark.serializer org.apache.spark.serializer.KryoSerializer
+
+spark.driver.memory 4g
+spark.driver.maxResultSize 4g
+spark.executor.cores 4
+spark.executor.memory 12g
+spark.executor.memoryOverhead 2g
 
 spark.sql.storeAssignmentPolicy legacy
 spark.sql.hive.convertCTAS true
@@ -40,6 +47,9 @@ spark.sql.adaptive.enabled true
 spark.sql.maxPlanStringLength 2048
 
 spark.kubernetes.allocation.batch.size 50
+spark.kubernetes.executor.request.cores 1
+spark.kubernetes.executor.limit.cores 6
+spark.kubernetes.executor.podTemplateFile /opt/spark/conf/executorTemplate.yaml
 
 spark.dynamicAllocation.enabled true
 spark.dynamicAllocation.shuffleTracking.enabled true
