@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-ARG java_image_tag=8-jre-slim
+ARG java_image_tag=8-jdk-slim
 
 FROM openjdk:${java_image_tag}
 
@@ -28,7 +28,7 @@ ARG spark_uid=185
 # docker build -t spark:latest -f kubernetes/dockerfiles/spark/Dockerfile .
 
 RUN set -ex && \
-    sed -i "s@deb.debian.org@mirrors.aliyun.com@g" /etc/apt/sources.list && \
+    sed -i "s/deb.debian.org/mirrors.aliyun.com/g" /etc/apt/sources.list && \
     apt-get update && \
     ln -s /lib /lib64 && \
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
