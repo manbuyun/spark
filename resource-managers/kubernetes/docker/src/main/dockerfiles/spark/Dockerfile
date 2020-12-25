@@ -33,7 +33,7 @@ RUN set -ex && \
     ln -s /lib /lib64 && \
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
     echo 'Asia/Shanghai' > /etc/timezone && \
-    apt install -y bash tini libc6 libpam-modules krb5-user libnss3 && \
+    apt install -y bash tini libc6 libpam-modules krb5-user libnss3 procps && \
     mkdir -p /opt/spark && \
     mkdir -p /opt/spark/examples && \
     mkdir -p /opt/spark/work-dir && \
